@@ -1,0 +1,19 @@
+{
+  "name": "Alphabet Light Hero Quest",
+  "short_name": "Alphabet Quest",
+  "description": "兒童英文字母與單字語音闖關遊戲",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#15243a",
+  "theme_color": "#15243a",
+  "icons": [
+    {
+      "src": "/assets/generated/hero-nova-actions.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

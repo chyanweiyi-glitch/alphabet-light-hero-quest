@@ -1,0 +1,7 @@
+.venv/
+.DS_Store
+.env.local
+dist/
+.netlify/
+node_modules/
+tmp/

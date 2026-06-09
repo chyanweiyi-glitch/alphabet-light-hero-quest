@@ -1,0 +1,11 @@
+{
+  "name": "alphabet-light-hero-quest",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-netlify.mjs",
+    "start": "node server.mjs",
+    "check": "node --check game.js && node --check server.mjs && node --check netlify/functions/speech.mjs && node --check netlify/functions/transcribe.mjs"
+  }
+}

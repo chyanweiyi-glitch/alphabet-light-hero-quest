@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Alphabet Light Hero Quest</title>
+    <link rel="icon" href="data:," />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#15243a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Alphabet Quest" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="game-shell">
+      <section class="stage-panel" aria-label="Alphabet Light Hero Quest game">
+        <canvas id="gameCanvas" width="1280" height="720"></canvas>
+
+        <div class="top-hud" aria-live="polite">
+          <div class="hud-block">
+            <span>關卡</span>
+            <strong id="levelLabel">A</strong>
+          </div>
+          <div class="hud-block">
+            <span>玩家 HP</span>
+            <strong id="playerHp">100</strong>
+          </div>
+          <div class="hud-block">
+            <span>怪物 HP</span>
+            <strong id="monsterHp">100</strong>
+          </div>
+          <div class="hud-block">
+            <span>倒數</span>
+            <strong id="timerLabel">5.0</strong>
+          </div>
+        </div>
+
+        <div class="prompt-card" id="promptCard">
+          <div class="prompt-meta" id="promptMeta">選擇光之戰士開始冒險</div>
+          <div class="spell-text" id="spellText">A</div>
+          <div class="translation-text" id="translationText"></div>
+          <div class="kk-text" id="kkText"></div>
+          <div class="heard-text" id="heardText">請允許麥克風，或用鍵盤輸入答案</div>
+          <button class="refresh-word-button" id="refreshWordButton" type="button">刷新單字</button>
+          <form id="answerForm" class="answer-form">
+            <input id="answerInput" autocomplete="off" inputmode="latin" placeholder="也可以在這裡輸入後按 Enter" />
+            <button type="submit">複誦</button>
+          </form>
+        </div>
+
+        <div class="choice-panel" id="choicePanel">
+          <div class="choice-title">選擇你的光之戰士</div>
+          <div class="choice-actions">
+            <button class="character-choice" data-hero="nova">紅銀戰士</button>
+            <button class="character-choice" data-hero="aqua">藍銀戰士</button>
+            <button class="character-choice" data-hero="solar">金紅戰士</button>
+          </div>
+          <div class="difficulty-title">選擇單字程度</div>
+          <div class="difficulty-actions">
+            <button class="difficulty-choice" data-difficulty="preschool">幼兒程度</button>
+            <button class="difficulty-choice" data-difficulty="elementary">國小程度</button>
+          </div>
+          <div class="choice-summary" id="choiceSummary">目前：紅銀戰士 / A 關</div>
+          <button class="start-button" id="startButton" type="button">開始挑戰</button>
+        </div>
+
+        <div class="result-overlay" id="resultOverlay" hidden>
+          <div class="result-title" id="resultTitle">WIN</div>
+          <div class="result-subtitle" id="resultSubtitle">完成冒險</div>
+        </div>
+
+        <div class="bottom-bar">
+          <button id="micButton" type="button">開始語音</button>
+          <button id="musicButton" type="button">音樂開關</button>
+          <label class="volume-control">
+            <span>音樂</span>
+            <input id="musicVolume" type="range" min="0" max="100" value="45" />
+          </label>
+          <label class="volume-control">
+            <span>音效</span>
+            <input id="sfxVolume" type="range" min="0" max="100" value="70" />
+          </label>
+          <button id="restartButton" type="button">重新開始</button>
+          <div class="phase-label" id="phaseLabel">等待開始</div>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <h1>Alphabet Light Hero Quest</h1>
+        <p>電腦會先念三次咒語，小朋友跟著複誦。答對才能用光線攻擊，怪獸攻擊時答對可以張開屏障防禦。</p>
+        <div class="level-help">選擇關卡</div>
+        <div class="progress-grid" id="progressGrid" aria-label="letter progress"></div>
+        <div class="log-box" id="logBox" aria-live="polite"></div>
+      </aside>
+    </main>
+
+    <script src="game.js"></script>
+    <script>
+      if ("serviceWorker" in navigator && location.protocol === "https:") {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("/sw.js").catch(() => {});
+        });
+      }
+    </script>
+  </body>
+</html>
