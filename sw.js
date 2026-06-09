@@ -1,4 +1,5 @@
-const CACHE_NAME = "alphabet-light-hero-quest-v7";
+const CACHE_NAME = "alphabet-light-hero-quest-v8";
+const SPEECH_CACHE_NAME = "alphabet-light-hero-quest-speech-v1";
 const CORE_ASSETS = [
   "/",
   "/index.html",
@@ -22,7 +23,7 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))),
+    caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME && key !== SPEECH_CACHE_NAME).map((key) => caches.delete(key)))),
   );
   self.clients.claim();
 });
@@ -35,7 +36,7 @@ self.addEventListener("fetch", (event) => {
 
   if (url.pathname.startsWith("/api/speech")) {
     event.respondWith(
-      caches.open(CACHE_NAME).then(async (cache) => {
+      caches.open(SPEECH_CACHE_NAME).then(async (cache) => {
         const cached = await cache.match(request);
         if (cached) return cached;
         const response = await fetch(request);

@@ -32,6 +32,7 @@ const ui = {
 
 const REPEAT_SECONDS = 6;
 const MAX_SMALL_CASTS_PER_LEVEL = 4;
+const SPEECH_CACHE_NAME = "alphabet-light-hero-quest-speech-v1";
 const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 const wordBank = {
   A: ["animal", "answer", "around", "after", "again"],
@@ -603,6 +604,8 @@ let submitRecording = false;
 let activeRecorderMimeType = "";
 let activeSpeechAudio = null;
 let activeSpeechUrl = "";
+const speechBlobMemory = new Map();
+const speechPreloadInFlight = new Set();
 
 const heroConfigs = {
   nova: { name: "紅銀戰士", primary: "#e64242", secondary: "#f3f7ff", gem: "#5ee7d4", beam: "#7dfcff", pose: "beam" },
@@ -738,6 +741,16 @@ function wordsForLetter(letter = currentLetter()) {
   return currentWordBank()[letter] || wordBank[letter] || [];
 }
 
+function speechTextForWord(text) {
+  return normalizeAnswer(text).length === 1 ? text.toUpperCase() : text.toLowerCase();
+}
+
+function speechTextsForLevel(level = state.level) {
+  const letter = alphabet[level];
+  if (!letter) return [];
+  return [...new Set([letter, ...wordsForLetter(letter)].map(speechTextForWord))];
+}
+
 function currentWord(excludeWord = "") {
   const letter = currentLetter();
   const words = wordsForLetter(letter);
@@ -870,12 +883,79 @@ function fetchWithTimeout(url, timeoutMs = 6500) {
   return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer));
 }
 
+function speechUrl(text) {
+  return `/api/speech?text=${encodeURIComponent(text)}`;
+}
+
+async function readSpeechFromBrowserCache(url) {
+  try {
+    if (!("caches" in window)) return null;
+    const cache = await caches.open(SPEECH_CACHE_NAME);
+    const cached = await cache.match(url);
+    return cached?.ok ? cached.blob() : null;
+  } catch {
+    return null;
+  }
+}
+
+async function writeSpeechToBrowserCache(url, response) {
+  try {
+    if (!("caches" in window)) return;
+    const cache = await caches.open(SPEECH_CACHE_NAME);
+    await cache.put(url, response.clone());
+  } catch {
+    // Some private browsing modes disable Cache Storage; memory cache still helps.
+  }
+}
+
 async function fetchSpeechBlob(text, token) {
   if (token !== state.speakToken) throw new Error("speech cancelled");
-  const response = await fetchWithTimeout(`/api/speech?text=${encodeURIComponent(text)}`);
+  const url = speechUrl(text);
+  const cachedMemory = speechBlobMemory.get(url);
+  if (cachedMemory) return cachedMemory;
+  const cachedStorage = await readSpeechFromBrowserCache(url);
+  if (cachedStorage) {
+    speechBlobMemory.set(url, cachedStorage);
+    return cachedStorage;
+  }
+  const response = await fetchWithTimeout(url);
   if (!response.ok) throw new Error("speech api failed");
+  await writeSpeechToBrowserCache(url, response);
   if (token !== state.speakToken) throw new Error("speech cancelled");
-  return response.blob();
+  const blob = await response.blob();
+  speechBlobMemory.set(url, blob);
+  return blob;
+}
+
+async function preloadSpeechText(text) {
+  const normalized = speechTextForWord(text);
+  const url = speechUrl(normalized);
+  if (speechBlobMemory.has(url) || speechPreloadInFlight.has(url)) return;
+  speechPreloadInFlight.add(url);
+  try {
+    const cached = await readSpeechFromBrowserCache(url);
+    if (cached) {
+      speechBlobMemory.set(url, cached);
+      return;
+    }
+    const response = await fetchWithTimeout(url, 9000);
+    if (!response.ok) return;
+    await writeSpeechToBrowserCache(url, response);
+    speechBlobMemory.set(url, await response.blob());
+  } catch {
+    // Background preload is opportunistic; real playback still retries.
+  } finally {
+    speechPreloadInFlight.delete(url);
+  }
+}
+
+function preloadSpeechForLevel(level = state.level, includeNext = true) {
+  const levels = [level];
+  if (includeNext && level + 1 < alphabet.length) levels.push(level + 1);
+  const texts = [...new Set(levels.flatMap((item) => speechTextsForLevel(item)))];
+  texts.forEach((text, index) => {
+    setTimeout(() => preloadSpeechText(text), index * 220);
+  });
 }
 
 function playSpeechBlob(blob, text, token) {
@@ -993,6 +1073,7 @@ function selectDifficulty(difficulty) {
     showSelectedLevelPreview();
   }
   updateChoiceSummary();
+  preloadSpeechForLevel(state.selectedLevel);
 }
 
 function selectHero(hero) {
@@ -1019,6 +1100,7 @@ function selectLevel(level) {
   ui.phaseLabel.textContent = "等待開始";
   updateChoiceSummary();
   updateHud();
+  preloadSpeechForLevel(state.selectedLevel);
 }
 
 function showSelectedLevelPreview() {
@@ -1054,6 +1136,7 @@ function refreshCurrentWord() {
     ui.kkText.textContent = getKk(word) ? `KK [${getKk(word)}]` : "";
     ui.promptMeta.textContent = `預覽 ${alphabet[state.selectedLevel]} 關單字：${difficultyLabels[state.difficulty]}`;
     ui.heardText.textContent = "按開始後會正式出題";
+    preloadSpeechForLevel(state.selectedLevel, false);
     return;
   }
   if (!state.challenge || state.phase === "checking" || state.resultMode) return;
@@ -1068,6 +1151,7 @@ function refreshCurrentWord() {
   updatePromptForChallenge(challenge, "demo");
   ui.heardText.textContent = "已刷新單字，重新範讀 3 次";
   ui.phaseLabel.textContent = "範讀中";
+  preloadSpeechForLevel(state.level, false);
   speakChallengeThenRepeat(challenge);
 }
 
@@ -1099,6 +1183,7 @@ async function startGame(hero = state.selectedHero, level = state.selectedLevel)
   document.body.classList.add("game-running");
   log(`冒險開始！挑戰 ${currentLetter()} 關。`);
   updateHud();
+  preloadSpeechForLevel(state.level);
   enableVoiceForGame();
   beginPlayerTurn();
   startMusic();
@@ -1272,6 +1357,7 @@ function completeLevel() {
   state.monsterHp = 100;
   state.playerHp = Math.min(100, state.playerHp + 12);
   updateHud();
+  preloadSpeechForLevel(state.level);
   state.phase = "idle";
   ui.phaseLabel.textContent = "下一關準備";
   ui.kkText.textContent = "";
