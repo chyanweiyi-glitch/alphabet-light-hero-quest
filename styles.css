@@ -456,26 +456,55 @@ button:disabled {
   }
 
   .top-hud {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
+    top: 6px;
+    left: 6px;
+    right: 6px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .hud-block {
+    min-height: 34px;
+    padding: 4px 5px;
+  }
+
+  .hud-block span {
+    font-size: 9px;
+  }
+
+  .hud-block strong {
+    font-size: 14px;
   }
 
   .prompt-card {
-    top: 112px;
-    padding: 8px;
+    top: 48px;
+    padding: 6px;
+  }
+
+  .prompt-meta,
+  .heard-text {
+    min-height: 16px;
+    font-size: 11px;
   }
 
   .spell-text {
-    font-size: 34px;
+    font-size: 28px;
   }
 
   .translation-text,
   .kk-text {
-    font-size: 15px;
+    min-height: 18px;
+    font-size: 13px;
   }
 
   .answer-form {
     grid-template-columns: 1fr;
+    margin-top: 6px;
+    gap: 6px;
+  }
+
+  .answer-form input {
+    padding: 8px 10px;
   }
 
   .answer-form button {
@@ -483,20 +512,62 @@ button:disabled {
   }
 
   .choice-actions {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .difficulty-actions {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body:not(.game-running) .stage-panel {
+    overflow: visible;
+    margin-bottom: 420px;
+  }
+
+  body:not(.game-running) .choice-panel {
+    top: calc(100% + 12px);
+    bottom: auto;
+    padding: 12px;
+  }
+
+  body:not(.game-running) .choice-title {
+    margin-bottom: 8px;
+    font-size: 18px;
+  }
+
+  body:not(.game-running) .difficulty-title,
+  body:not(.game-running) .choice-summary {
+    margin: 10px 0 6px;
+  }
+
+  body:not(.game-running) .start-button {
+    min-height: 44px;
+    font-size: 17px;
+  }
+
+  body:not(.game-running) .bottom-bar {
+    top: calc(100% + 260px);
+    bottom: auto;
+    left: 0;
+    right: 0;
   }
 
   .bottom-bar {
     flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .bottom-bar > button {
+    flex: 1 1 104px;
+    min-height: 38px;
+    padding: 8px 10px;
   }
 
   .volume-control {
     grid-template-columns: auto minmax(96px, 1fr);
     flex: 1 1 160px;
+    min-height: 38px;
+    padding: 6px 8px;
   }
 
   .volume-control input {
