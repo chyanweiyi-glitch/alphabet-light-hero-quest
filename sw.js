@@ -1,4 +1,4 @@
-const CACHE_NAME = "alphabet-light-hero-quest-v5";
+const CACHE_NAME = "alphabet-light-hero-quest-v6";
 const CORE_ASSETS = [
   "/",
   "/index.html",

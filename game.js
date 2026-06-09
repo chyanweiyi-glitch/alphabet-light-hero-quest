@@ -900,6 +900,8 @@ function beginRepeatWindow(challenge) {
   ui.phaseLabel.textContent = challenge.owner === "player" ? "複誦攻擊" : "複誦防禦";
   ui.answerInput.value = "";
   ui.answerInput.focus();
+  flash(challenge.owner === "player" ? "rgba(94, 231, 212, 0.28)" : "rgba(255, 122, 153, 0.22)", 0.5);
+  playTone(challenge.owner === "player" ? 1040 : 620, 0.14, "triangle", 0.045);
   if (challenge.owner === "monster") {
     removeMonsterProjectile();
     setActorAction("monster", "attack", 1.1);
@@ -1033,7 +1035,7 @@ async function startGame(hero = state.selectedHero, level = state.selectedLevel)
   document.body.classList.add("game-running");
   log(`冒險開始！挑戰 ${currentLetter()} 關。`);
   updateHud();
-  await enableVoiceForGame();
+  enableVoiceForGame();
   beginPlayerTurn();
   startMusic();
 }
