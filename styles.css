@@ -595,7 +595,181 @@ button:disabled {
     width: calc(100vw - 16px);
   }
 
+  body.game-running .prompt-card {
+    top: auto;
+    bottom: 8px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 132px;
+    gap: 3px 8px;
+    align-items: end;
+    width: calc(100% - 16px);
+    padding: 6px;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.78);
+  }
+
+  body.game-running .prompt-meta {
+    grid-column: 1;
+    min-height: 0;
+    overflow: hidden;
+    color: #31506b;
+    font-size: 10px;
+    line-height: 1.1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  body.game-running .spell-text {
+    grid-column: 1;
+    font-size: 24px;
+    line-height: 0.95;
+  }
+
+  body.game-running .translation-text,
+  body.game-running .kk-text {
+    grid-column: 1;
+    min-height: 0;
+    font-size: 11px;
+    line-height: 1.1;
+  }
+
+  body.game-running .heard-text,
+  body.game-running .refresh-word-button {
+    display: none;
+  }
+
+  body.game-running .answer-form {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    grid-template-columns: 1fr;
+    gap: 4px;
+    margin: 0;
+  }
+
+  body.game-running .answer-form input {
+    min-height: 30px;
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  body.game-running .answer-form button {
+    min-height: 28px;
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+
   body.game-running .bottom-bar {
+    display: none;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 640px) {
+  body.game-running {
+    overflow: hidden;
+  }
+
+  body.game-running .game-shell {
+    display: block;
+    width: 100vw;
+    min-height: 100svh;
+    padding: 0;
+  }
+
+  body.game-running .stage-panel {
+    width: 100vw;
+    height: 100svh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  body.game-running #gameCanvas {
+    width: 100%;
+    height: auto;
+    min-height: 100%;
+  }
+
+  body.game-running .top-hud {
+    top: max(6px, env(safe-area-inset-top));
+    left: max(8px, env(safe-area-inset-left));
+    right: max(8px, env(safe-area-inset-right));
+    grid-template-columns: repeat(4, minmax(74px, 1fr));
+    gap: 6px;
+  }
+
+  body.game-running .hud-block {
+    min-height: 38px;
+    padding: 5px 8px;
+  }
+
+  body.game-running .hud-block span {
+    font-size: 10px;
+  }
+
+  body.game-running .hud-block strong {
+    font-size: 16px;
+  }
+
+  body.game-running .prompt-card {
+    top: auto;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 170px;
+    gap: 4px 10px;
+    align-items: end;
+    width: min(520px, calc(100% - 20px));
+    padding: 7px 9px;
+    text-align: left;
+    background: rgba(255, 255, 255, 0.76);
+  }
+
+  body.game-running .prompt-meta,
+  body.game-running .heard-text {
+    min-height: 0;
+    overflow: hidden;
+    font-size: 11px;
+    line-height: 1.1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  body.game-running .spell-text {
+    font-size: 28px;
+  }
+
+  body.game-running .translation-text,
+  body.game-running .kk-text {
+    min-height: 0;
+    font-size: 12px;
+    line-height: 1.1;
+  }
+
+  body.game-running .refresh-word-button {
+    display: none;
+  }
+
+  body.game-running .answer-form {
+    grid-column: 2;
+    grid-row: 1 / span 5;
+    grid-template-columns: 1fr;
+    gap: 4px;
+    margin: 0;
+  }
+
+  body.game-running .answer-form input {
+    min-height: 32px;
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  body.game-running .answer-form button {
+    min-height: 30px;
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+
+  body.game-running .bottom-bar,
+  body.game-running .side-panel {
     display: none;
   }
 }
