@@ -582,7 +582,7 @@ button:disabled {
 
 @media (orientation: portrait) and (max-width: 760px) {
   body.game-running {
-    overflow: auto;
+    overflow: hidden;
   }
 
   body.game-running .game-shell {
@@ -593,5 +593,9 @@ button:disabled {
 
   body.game-running .stage-panel {
     width: calc(100vw - 16px);
+  }
+
+  body.game-running .bottom-bar {
+    display: none;
   }
 }
