@@ -597,30 +597,27 @@ button:disabled {
 
   body.game-running .prompt-card {
     top: auto;
-    bottom: 8px;
+    right: 8px;
+    bottom: 6px;
+    left: auto;
+    transform: none;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 132px;
-    gap: 3px 8px;
-    align-items: end;
-    width: calc(100% - 16px);
-    padding: 6px;
+    grid-template-columns: 74px minmax(0, 1fr);
+    gap: 2px 6px;
+    align-items: center;
+    width: min(242px, calc(100% - 16px));
+    padding: 5px;
     text-align: left;
-    background: rgba(255, 255, 255, 0.78);
+    background: rgba(255, 255, 255, 0.68);
   }
 
   body.game-running .prompt-meta {
-    grid-column: 1;
-    min-height: 0;
-    overflow: hidden;
-    color: #31506b;
-    font-size: 10px;
-    line-height: 1.1;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: none;
   }
 
   body.game-running .spell-text {
     grid-column: 1;
+    grid-row: 1 / span 2;
     font-size: 24px;
     line-height: 0.95;
   }
@@ -629,8 +626,11 @@ button:disabled {
   body.game-running .kk-text {
     grid-column: 1;
     min-height: 0;
-    font-size: 11px;
+    overflow: hidden;
+    font-size: 10px;
     line-height: 1.1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   body.game-running .heard-text,
@@ -640,22 +640,22 @@ button:disabled {
 
   body.game-running .answer-form {
     grid-column: 2;
-    grid-row: 1 / span 4;
+    grid-row: 1 / span 3;
     grid-template-columns: 1fr;
-    gap: 4px;
+    gap: 3px;
     margin: 0;
   }
 
   body.game-running .answer-form input {
-    min-height: 30px;
-    padding: 6px 8px;
-    font-size: 12px;
+    min-height: 24px;
+    padding: 4px 6px;
+    font-size: 11px;
   }
 
   body.game-running .answer-form button {
-    min-height: 28px;
-    padding: 5px 8px;
-    font-size: 12px;
+    min-height: 24px;
+    padding: 4px 6px;
+    font-size: 11px;
   }
 
   body.game-running .bottom-bar {
@@ -676,6 +676,7 @@ button:disabled {
   }
 
   body.game-running .stage-panel {
+    position: relative;
     width: 100vw;
     height: 100svh;
     border: 0;
@@ -684,9 +685,12 @@ button:disabled {
   }
 
   body.game-running #gameCanvas {
-    width: 100%;
-    height: auto;
-    min-height: 100%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100vw, calc(100svh * 16 / 9));
+    height: max(100svh, calc(100vw * 9 / 16));
+    transform: translate(-50%, -50%);
   }
 
   body.game-running .top-hud {
@@ -712,36 +716,41 @@ button:disabled {
 
   body.game-running .prompt-card {
     top: auto;
-    bottom: max(8px, env(safe-area-inset-bottom));
+    right: max(8px, env(safe-area-inset-right));
+    bottom: max(7px, env(safe-area-inset-bottom));
+    left: auto;
+    transform: none;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 170px;
-    gap: 4px 10px;
-    align-items: end;
-    width: min(520px, calc(100% - 20px));
-    padding: 7px 9px;
+    grid-template-columns: 82px minmax(0, 1fr);
+    gap: 2px 7px;
+    align-items: center;
+    width: min(272px, calc(100% - 20px));
+    padding: 6px;
     text-align: left;
-    background: rgba(255, 255, 255, 0.76);
+    background: rgba(255, 255, 255, 0.66);
   }
 
   body.game-running .prompt-meta,
   body.game-running .heard-text {
-    min-height: 0;
-    overflow: hidden;
-    font-size: 11px;
-    line-height: 1.1;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: none;
   }
 
   body.game-running .spell-text {
+    grid-column: 1;
+    grid-row: 1 / span 2;
     font-size: 28px;
+    line-height: 0.95;
   }
 
   body.game-running .translation-text,
   body.game-running .kk-text {
+    grid-column: 1;
     min-height: 0;
-    font-size: 12px;
+    overflow: hidden;
+    font-size: 10px;
     line-height: 1.1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   body.game-running .refresh-word-button {
@@ -750,22 +759,22 @@ button:disabled {
 
   body.game-running .answer-form {
     grid-column: 2;
-    grid-row: 1 / span 5;
+    grid-row: 1 / span 3;
     grid-template-columns: 1fr;
-    gap: 4px;
+    gap: 3px;
     margin: 0;
   }
 
   body.game-running .answer-form input {
-    min-height: 32px;
-    padding: 6px 8px;
-    font-size: 12px;
+    min-height: 26px;
+    padding: 4px 6px;
+    font-size: 11px;
   }
 
   body.game-running .answer-form button {
-    min-height: 30px;
-    padding: 5px 8px;
-    font-size: 12px;
+    min-height: 26px;
+    padding: 4px 6px;
+    font-size: 11px;
   }
 
   body.game-running .bottom-bar,
