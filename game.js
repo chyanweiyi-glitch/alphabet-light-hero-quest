@@ -601,6 +601,8 @@ let recorderChunks = [];
 let recorderTimer = null;
 let submitRecording = false;
 let activeRecorderMimeType = "";
+let activeSpeechAudio = null;
+let activeSpeechUrl = "";
 
 const heroConfigs = {
   nova: { name: "紅銀戰士", primary: "#e64242", secondary: "#f3f7ff", gem: "#5ee7d4", beam: "#7dfcff", pose: "beam" },
@@ -843,36 +845,98 @@ function pronounceText(challenge) {
   return challenge.answer.length === 1 ? challenge.text.toUpperCase() : challenge.text.toLowerCase();
 }
 
+function stopActiveSpeechAudio() {
+  if (activeSpeechAudio) {
+    activeSpeechAudio.onended = null;
+    activeSpeechAudio.onerror = null;
+    activeSpeechAudio.pause();
+    activeSpeechAudio.removeAttribute("src");
+    activeSpeechAudio.load();
+  }
+  activeSpeechAudio = null;
+  if (activeSpeechUrl) URL.revokeObjectURL(activeSpeechUrl);
+  activeSpeechUrl = "";
+}
+
 function cancelSpeech() {
   state.speakToken += 1;
+  stopActiveSpeechAudio();
   if ("speechSynthesis" in window) window.speechSynthesis.cancel();
 }
 
-function speakOnce(text, token) {
+function fetchWithTimeout(url, timeoutMs = 6500) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer));
+}
+
+async function fetchSpeechBlob(text, token) {
+  if (token !== state.speakToken) throw new Error("speech cancelled");
+  const response = await fetchWithTimeout(`/api/speech?text=${encodeURIComponent(text)}`);
+  if (!response.ok) throw new Error("speech api failed");
+  if (token !== state.speakToken) throw new Error("speech cancelled");
+  return response.blob();
+}
+
+function playSpeechBlob(blob, text, token) {
   return new Promise((resolve) => {
     if (token !== state.speakToken) return resolve();
-    const encoded = encodeURIComponent(text);
-    const sound = new Audio(`/api/speech?text=${encoded}`);
+    stopActiveSpeechAudio();
+    activeSpeechUrl = URL.createObjectURL(blob);
+    const sound = new Audio(activeSpeechUrl);
+    activeSpeechAudio = sound;
+    sound.preload = "auto";
     sound.playbackRate = text.length === 1 ? 0.82 : 0.92;
-    sound.onended = resolve;
-    sound.onerror = () => fallbackSpeech(text, token).then(resolve);
-    sound.play().catch(() => fallbackSpeech(text, token).then(resolve));
-    setTimeout(resolve, 2600);
+    let done = false;
+    const maxDuration = text.length === 1 ? 3600 : 5200;
+    const finish = (ok) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      if (activeSpeechAudio === sound) stopActiveSpeechAudio();
+      ok ? resolve(true) : resolve(false);
+    };
+    const timer = setTimeout(() => finish(false), maxDuration);
+    sound.onended = () => finish(true);
+    sound.onerror = () => finish(false);
+    sound.play().catch(() => finish(false));
   });
+}
+
+async function speakOnce(text, token) {
+  for (let attempt = 1; attempt <= 2; attempt += 1) {
+    if (token !== state.speakToken) return false;
+    try {
+      const blob = await fetchSpeechBlob(text, token);
+      const played = await playSpeechBlob(blob, text, token);
+      if (played) return true;
+    } catch {
+      // Try the API once more before falling back to the browser voice.
+    }
+  }
+  return fallbackSpeech(text, token);
 }
 
 function fallbackSpeech(text, token) {
   return new Promise((resolve) => {
     if (!("speechSynthesis" in window) || token !== state.speakToken) return resolve();
+    window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "en-US";
     utterance.rate = text.length === 1 ? 0.62 : 0.74;
     utterance.pitch = 1.04;
     utterance.volume = 1;
-    utterance.onend = resolve;
-    utterance.onerror = resolve;
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      resolve(true);
+    };
+    const timer = setTimeout(finish, text.length === 1 ? 2200 : 3400);
+    utterance.onend = finish;
+    utterance.onerror = finish;
     window.speechSynthesis.speak(utterance);
-    setTimeout(resolve, 1800);
   });
 }
 
@@ -1040,7 +1104,7 @@ async function startGame(hero = state.selectedHero, level = state.selectedLevel)
   startMusic();
 }
 
-async function enableVoiceForGame() {
+function enableVoiceForGame() {
   if (state.recognitionOn) return;
   if (window.location.protocol === "file:" || !window.isSecureContext) {
     ui.micButton.textContent = "語音需 HTTPS";
@@ -1048,16 +1112,8 @@ async function enableVoiceForGame() {
     return;
   }
   state.recognitionOn = true;
-  ui.micButton.textContent = "要求權限中";
-  const permitted = await requestMicPermission();
-  if (!permitted) {
-    state.recognitionOn = false;
-    ui.micButton.textContent = "開始語音";
-    ui.heardText.textContent = "麥克風未開啟，可先用鍵盤輸入答案";
-    return;
-  }
-  ui.micButton.textContent = "語音已開啟";
-  ui.heardText.textContent = "語音已開啟，請聽完範讀後複誦";
+  ui.micButton.textContent = "語音準備中";
+  ui.heardText.textContent = "先聽電腦範讀，輪到複誦時會自動開啟麥克風";
 }
 
 function restartGame() {
